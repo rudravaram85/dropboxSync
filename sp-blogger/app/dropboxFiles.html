@@ -1,0 +1,37 @@
+
+<div class="" style="text-align: center;">
+<ul class="nav nav-tabs">
+        <li style="left:500px;" class="active"><a data-toggle="tab" href="#menu1">Add Account</a></li>
+        </ul>
+
+      <div>
+            
+      <div class="tab-content">
+          
+            <div id="menu1" class="tab-pane fade in active">
+                <br>  <br> <br> <br>
+                
+                <span ng-show="!account_configured"><h5> No DropBox Account Configured</h5></span>
+                <span ng-show="account_configured"><h5>DropBox Account Configured</h5></span>
+                            <span ng-show="account_configured" style="text-decoration: underline;"><h6>Account Name : {{accountName}}</h6></span>
+                                
+                        <br>  
+                        <span ng-show="account_configured" style="color:red;"><h5>*Please enter dropbox Folder Name below</h5></span>
+                        <br> 
+                        
+                        
+                    <button ng-show="!account_configured" class="btn btn-info btn-sm" ng-click="showPopup()">Configure Dropbox Account</button>
+                    <br>  <br> <br> <br>
+                 DropBox Folder Name : <input type="text" value="1234" ng-model="folder" class="" />&nbsp;&nbsp;&nbsp;
+                 <button  ng-click="importFiles()" class="btn btn-info btn-sm"><i ng-show="folder_sync_spinner" class="fa fa-refresh fa-spin"></i><span ng-show="folder_sync_spinner"> Syncing</span><span ng-show="folder_sync"> Start Sync</span></button>
+                 
+                 <br>
+                  <span ng-show="folder_not_found_error"  class="h6" style="color:red;padding-left: 60px;" >*Cannot Find The Folder</span>
+                  <span ng-show="folder_no_fill_error"  class="h6" style="color:red;padding-left: 60px;" >*Please enter Folder name</span>
+                  <br>  <br> <br>
+                  <br>
+                </div>
+           
+                                    </div>
+          
+                                </div>
