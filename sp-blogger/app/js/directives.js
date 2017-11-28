@@ -7,7 +7,6 @@ angular.module('spBlogger.directives',[])
         templateUrl: 'app/dropboxFiles.html',
         require: 'ngModel',
        
-      //  scope: { },
 
         link: function (scope, element, attrs,ngModel) {
             scope.folder="";
@@ -25,24 +24,20 @@ angular.module('spBlogger.directives',[])
                 };
             });
           
-            var winref = "";
-
-            
+            var winref = "";    
                     // assign the current $scope to $window so that the popup window can access it
                     $window.scope = scope;
                     console.log(scope);
 
                     scope.showPopup = function showPopup() {
-                        var x = "https://www.dropbox.com/oauth2/authorize?client_id="+"<client-id>"+"&redirect_uri=http:%2F%2Flocalhost:8000&response_type=code";
+                        var x = "https://www.dropbox.com/oauth2/authorize?client_id="+"<account_id>"+"&redirect_uri=http:%2F%2Flocalhost:8000&response_type=code";
 
                         // center the popup window
                         var popup = $window.open(x, '', "width=900,height=500")
                             , interval = 1000;
                            scope.authToken ="";
                            
-                           scope.account_configured = true;
-                           scope.accountName = "rajesh";
-                           
+                            
                         // create an ever increasing interval to check a certain global value getting assigned in the popup
                         var i = $interval(function () {
                             interval += 500;
@@ -72,18 +67,36 @@ angular.module('spBlogger.directives',[])
                       var promise =  $http({
                           headers:{"content-type":"application/x-www-form-urlencoded"},
                             data: "code="+scope.oauthCode+"&grant_type=authorization_code"+
-                             "&client_id="+encodeURIComponent("<client_id>")+"&client_secret="+encodeURIComponent("client_secret")+
+                             "&client_id="+encodeURIComponent("<app_key>")+"&client_secret="+encodeURIComponent("<app_secret>")+
                              "&redirect_uri=http://localhost:8000",
                                withCredentials:false, 
                                 method: 'POST',
                                 url: 'https://api.dropboxapi.com/1/oauth2/token',                      
                                        }).then(function (respo) {
                                            console.log("response below");
-										   scope.oauthToken=respo.data.access_token;                                         
+                                           scope.oauthToken=respo.data.access_token; 
+                                           scope.account_id = respo.data.account_id;  
+                                           getUserAccountInfo();                                      
                                     }, function (respo) {
                                         console.log(respo);                                         
                                         
                                     });
+                    }
+
+                    function getUserAccountInfo(){
+                         
+                        var dropboxAccountPromise = $http({headers: { 'Content-Type': 'application/json','Authorization':'Bearer '+ scope.oauthToken },
+                        data:{"account_id":scope.account_id},
+                        withCredentials : false,                  
+                         method: 'POST',
+                         url: 'https://api.dropboxapi.com/2/users/get_account',                  
+     
+                     }).then(function (resp) {
+                          console.log(resp.data.name.display_name);
+                          scope.account_configured = true;
+                          scope.accountName = resp.data.name.display_name;
+                        
+                     });
                     }
                 
                     
@@ -162,8 +175,8 @@ angular.module('spBlogger.directives',[])
           function s3FileUpload() {
                 
                 var config = {
-                    bucket: "<bucket_name>",
-                    access_key: "<access_key>",
+                    bucket: "advokitbucket",
+                    access_key: "<acess_key>",
                     secret_key: "<secret_key>",
                     region: "ap-south-1",
                     acl: "public-read",                                                 // to allow the uploaded file to be publicly accessible. Can also be set to "private"
