@@ -7,15 +7,30 @@ To avail thise feature an app must be created in dropbox developer website where
 
 https://www.dropbox.com/developers
 
-To authenticate dropbox account we use Oauth2 methodology.First a user has to configure the dropbox account and then he can sync the folder.
+To authenticate dropbox account we use Oauth2 methodology. First a user has to configure the dropbox account and then he can sync the folder.
 
-TO configure dropbox account , dropbox api explorer provides an option of opening a popup on button click.This popup has the signin logic already inbuilt by dropbox. When the user tries to authenticate , if it's a success dropbox redirects to the redirect_uri provided in the dropbox app with a authorization code in the url parameter.
+TO configure dropbox account , dropbox api explorer provides an option of opening a popup on button click.This popup has the signin logic already inbuilt by dropbox. When the user tries to authenticate , if it's a success, dropbox redirects to the redirect_uri provided in the dropbox app with a authorization code in the url parameter.
 
 This parameter has to be accessed and an api call has to be made to https://api.dropboxapi.com/oauth2/token url.On success dropbox api sends a response with bearer token, this bearer token is used to make api calls to get data and metadata.
 
 When the user enters folder name , an api call is made to https://api.dropboxapi.com/2/files/list_folder. This api returns the details about the files in the folder.It is metadata of each file.
 
-An api call for each single file detail to https://content.dropboxapi.com/2/files/download to get the data.Filename is extracted from the response and object is associated with each filenmae and datapair.We use $q service for chaning the promises.
+An api call for each single file is made to https://content.dropboxapi.com/2/files/download to get the data.Filename is extracted from the response and object is associated with each filenmae and datapair.We use $q service for chaning the promises.
+
+We have convert the api response filedata to an actual file object, Please see below,
+
+                   // Construct a blob
+                  var fileDataBlob = [
+                    new Blob([item.data], {type: 'text/html'}),
+                    ' Same way as you do with blob',
+                    new Uint16Array([33])
+                  ];
+                  
+                     // Construct a file
+                  var dropboxDataFile = new File(fileDataBlob, item.name, {
+                      lastModified: new Date(0), // optional - default = now
+                      type: "overide/mimetype" // optional - default = ''
+                  });
 
 An aws s3 policy is made, with all the requirements. A signature is calculated using hmac sha256, please refer below,
 
@@ -34,12 +49,12 @@ An aws s3 policy is made, with all the requirements. A signature is calculated u
                   
   An api call is made for each imported file from dropbox to aws s3 using $q,this the tricky part,
   
-                 /* Angular’s default transformRequest function will try to serialize FormData object,
+                  Angular’s default transformRequest function will try to serialize FormData object,
                   override it with the identity function to leave the data intact.Angular’s default 
                   Content-Type header for POST and PUT requests is application/json ,to change set 
                   ‘Content-Type’: undefined, the browser sets the Content-Type to multipart/form-data
                   for promise and fills in the correct boundary. Manually setting ‘Content-Type’: multipart/form-data
-                  will fail to fill in the boundary parameter of the request.*/
+                  will fail to fill in the boundary parameter of the request.
 
                   return $http({data: formData,
                     headers: {'Content-Type': undefined}
@@ -56,7 +71,9 @@ An aws s3 policy is made, with all the requirements. A signature is calculated u
   
   
                   
-                  
+ In the directive.js file enter client_id and client_secret from dropbox developer app, and aws s3 access key and secret key.
+ 
+ go to app folder, open cmd and type command: node scripts/web-server.js and you are good to go.
                   
                   
                   
